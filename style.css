@@ -109,15 +109,7 @@ body {
     margin-bottom: 2%;
 }
 
-.game-over p {
-    font-size: 1.5em;
-    margin-bottom: 2%;
-    position: absolute;
-    width: 30%;
-    height: 15%;
-    left: 50%;
-    transform: translateX(-50%);
-}
+
 
 .game-over button {
     background-image: url('https://raw.githubusercontent.com/Ben00000000/Robot/main/Restart%20Button.png');

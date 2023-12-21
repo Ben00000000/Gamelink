@@ -449,8 +449,7 @@ function handlePlayerPositionUpdate() {
 
 function showGameOverScreen() {
     const gameOverScreen = document.getElementById('gameOverScreen');
-    const finalScoreElement = document.getElementById('finalScore');
-    finalScoreElement.textContent = score; // Assuming you want to display the final score
+    // Assuming you want to display the final score
     gameOverScreen.style.display = 'block';
 }
 
