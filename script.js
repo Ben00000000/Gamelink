@@ -83,11 +83,27 @@ const chasingShapeImageUrls = [
     'https://raw.githubusercontent.com/Ben00000000/Robot/main/frame_30_delay-0.02s.png'
 ];
 
+const lifeBarImages = [
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP0.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP1.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP2.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP3.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP4.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP5.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP6.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP7.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP8.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP9.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP10.png)',
+    'url(https://raw.githubusercontent.com/Ben00000000/Robot/main/HP11.png)'
+];
+
 
 // Array to store preloaded images
 const chasingShapeFrames = [];
 const playerIdleFrames = [];
 const playerAttackFrames = [];
+const lifeBarFrames = [];
 
 const preloadImages = () => {
     const images = [];
@@ -115,6 +131,13 @@ const preloadImages = () => {
         img.src = imageUrl;
         images.push(img);
     }
+  
+     // Preload life bar frames
+    lifeBarImages.forEach((imageUrl) => {
+        const img = new Image();
+        img.src = imageUrl.slice(4, -1); // Remove 'url(' and ')'
+        images.push(img);
+    });
 
     let imagesLoaded = 0;
 
@@ -128,13 +151,15 @@ const preloadImages = () => {
     };
 
     images.forEach((img, index) => {
-        // Separate preloaded images for idle, attack, and chasing shape frames
+        // Separate preloaded images for idle, attack, chasing shape, and life bar frames
         if (index < playerIdleFrameCount) {
             playerIdleFrames.push(img);
         } else if (index < playerIdleFrameCount + playerAttackFrameCount) {
             playerAttackFrames.push(img);
-        } else {
+        } else if (index < playerIdleFrameCount + playerAttackFrameCount + chasingShapeImageUrls.length) {
             chasingShapeFrames.push(img);
+        } else {
+            lifeBarFrames.push(img);
         }
 
         img.onload = checkAllImagesLoaded;
@@ -147,6 +172,7 @@ const frameInterval = 40; // Interval between frames in milliseconds
 let lastTimestamp = 0;
 
 function animatePlayer(timestamp) {
+  
   
    if (playerHP <= 0) {
         // Player is defeated, show game over screen
@@ -192,7 +218,7 @@ let allowedCircleSpawns = 10; // Set the desired limit
 let createdCircle; // Store a reference to the created circle
 
 function handleAttack(tapX, tapY) {
-   if (playerHP <= 0) {
+    if (playerHP <= 0) {
         return; // Stop moving if the game is over
     }
     if (allowedCircleSpawns > 0) {
@@ -213,8 +239,10 @@ function handleAttack(tapX, tapY) {
         } else {
             circleElement.style.left = `${playerRect.left + playerRect.width}px`;
         }
-         // Adjust the starting point to the middle of the player along the y-axis
-        const playerMidY = playerRect.top + playerRect.height / 2;
+        
+        // Adjust the starting point to be higher than the middle of the player along the y-axis
+        const playerMidY = playerRect.top + playerRect.height / 2.8; // You can adjust the divisor to control the height
+        
         circleElement.style.top = `${playerMidY - circleElement.clientHeight / 2}px`;
 
         circleElement.style.display = 'block';
@@ -228,11 +256,12 @@ function handleAttack(tapX, tapY) {
             isAttacking = false;
             document.body.removeChild(circleElement);
             allowedCircleSpawns++;
-           
+
             currentFrame = (currentFrame + 1) % playerAttackFrameCount;
         }, 600);
     }
 }
+
 
 
 let isClicking = false; // Flag to track if the click is being held
@@ -347,7 +376,7 @@ function generateChasingShapes() {
                     shapeRect.bottom > playerRect.top
                 ) {
                     document.body.removeChild(chasingShape);
-                    decreasePlayerHp(1);
+                    decreasePlayerHp(10);
                 }
 
                 if (createdCircle) {
@@ -390,7 +419,12 @@ function updateHpBarPosition() {
     hpBarContainer.style.left = `${playerRect.left + (playerRect.width - hpBarContainer.offsetWidth) / 2}px`;
 }
 
+
 function updateHpBar() {
+    const hpBarContainer = document.querySelector('.hp-bar-container');
+    const index = Math.floor((100 - playerHP) / 10);
+
+    hpBarContainer.style.backgroundImage = lifeBarImages[index];
     const percentage = (playerHP <= 0 ? 0 : playerHP) + '%';
     playerHpBar.style.width = percentage;
 
@@ -422,14 +456,13 @@ function showGameOverScreen() {
 
 function restartGame() {
     // Reset necessary game variables, player position, etc.
-  
     playerHP = 100;
     score = 0;
     updateScore();
     updateHpBar();
     // Other reset logic as needed
   
-      // Remove all chasing shapes from the DOM
+    // Remove all chasing shapes from the DOM
     const chasingShapes = document.querySelectorAll('.chasing-shape');
     chasingShapes.forEach(shape => {
         document.body.removeChild(shape);
@@ -441,6 +474,7 @@ function restartGame() {
     // Restart the animation
     animatePlayer();
 }
+
 
 
 updateScore();
